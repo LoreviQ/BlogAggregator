@@ -25,6 +25,7 @@ func main() {
 
 func initialiseServer(cfg ApiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/readiness", cfg.readinessHandler)
+	mux.HandleFunc("GET /v1/err", cfg.errorHandler)
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{
