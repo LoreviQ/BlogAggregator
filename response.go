@@ -6,13 +6,9 @@ import (
 	"net/http"
 )
 
-type JSONResponse interface {
-	convertToJson() ([]byte, error)
-}
-
-func respondWithJSON(w http.ResponseWriter, responseCode int, body JSONResponse) {
+func respondWithJSON[T any](w http.ResponseWriter, responseCode int, body T) {
 	w.Header().Set("Content-Type", "application/json")
-	data, err := body.convertToJson()
+	data, err := json.Marshal(body)
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)
 		w.WriteHeader(500)
