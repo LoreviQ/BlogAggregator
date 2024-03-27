@@ -43,6 +43,7 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/users", cfg.AuthMiddleware(cfg.getUser))
 	mux.HandleFunc("POST /v1/feeds", cfg.AuthMiddleware(cfg.postFeed))
 	mux.HandleFunc("GET /v1/feeds", cfg.getFeeds)
+	mux.HandleFunc("GET /v1/feed_follows", cfg.AuthMiddleware(cfg.getFeedFollows))
 	mux.HandleFunc("POST /v1/feed_follows", cfg.AuthMiddleware(cfg.postFeedFollow))
 	mux.HandleFunc("DELETE /v1/feed_follows/{feedFollowID}", cfg.deleteFeedFollow)
 

@@ -69,3 +69,32 @@ func (cfg *apiConfig) deleteFeedFollow(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (cfg *apiConfig) getFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
+	// CREATE FEED FOLLOW
+	feedFollows, err := cfg.DB.GetFeedFollows(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// RESPONSE
+	type response struct {
+		ID        uuid.UUID `json:"id"`
+		FeedID    uuid.UUID `json:"feed_id"`
+		UserID    uuid.UUID `json:"user_id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+	responseSlice := make([]response, 0, len(feedFollows))
+	for _, feedFollow := range feedFollows {
+		responseSlice = append(responseSlice, response{
+			ID:        feedFollow.ID,
+			FeedID:    feedFollow.FeedID,
+			UserID:    feedFollow.UserID,
+			CreatedAt: feedFollow.CreatedAt,
+			UpdatedAt: feedFollow.UpdatedAt,
+		})
+	}
+	respondWithJSON(w, http.StatusOK, responseSlice)
+}
