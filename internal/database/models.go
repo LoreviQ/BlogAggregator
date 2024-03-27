@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	Uuid      int32
+	Id      int32
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string

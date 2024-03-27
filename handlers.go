@@ -2,6 +2,10 @@ package main
 
 import (
 	"net/http"
+	"time"
+
+	"github.com/LoreviQ/BlogAggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
@@ -22,17 +26,32 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 	requestStruct := struct {
 		Name string `json:"name"`
 	}{}
-	_, err := decodeRequest(w, r, requestStruct)
+	request, err := decodeRequest(w, r, requestStruct)
 	if err != nil {
 		respondWithError(w, 500, "failed to decode")
 		return
 	}
 
+	// CREATE USER
+	user := database.CreateUserParams{
+		Id:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      request.Name,
+	}
+	cfg.DB.CreateUser(r.Context(), user)
+
 	// RESPONSE
 	responseStruct := struct {
-		Status string `json:"status"`
+		Id        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+		Name      string    `json:"name"`
 	}{
-		Status: "ok",
+		Id:        user.Id,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Name:      user.Name,
 	}
 	respondWithJSON(w, 200, responseStruct)
 }
