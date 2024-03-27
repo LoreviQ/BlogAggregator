@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,14 +10,19 @@ import (
 )
 
 type ApiConfig struct {
-	port string
+	port      string
+	dbConnect string
 }
 
 func main() {
 	godotenv.Load()
 	cfg := ApiConfig{
-		port: os.Getenv("PORT"),
+		port:      os.Getenv("PORT"),
+		dbConnect: os.Getenv("DB_CONNECT"),
 	}
+	fmt.Println(cfg.port)
+	fmt.Println(cfg.dbConnect)
+
 	server := initialiseServer(cfg, http.NewServeMux())
 
 	log.Printf("Serving on port: %s\n", cfg.port)
