@@ -50,7 +50,8 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at FROM feeds
+UPDATE feeds SET last_fetched_at = NOW()
+RETURNING id, created_at, updated_at, name, url, user_id, last_fetched_at
 `
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
