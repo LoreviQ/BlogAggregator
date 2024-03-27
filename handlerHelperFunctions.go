@@ -19,10 +19,11 @@ func respondWithJSON[T any](w http.ResponseWriter, responseCode int, body T) {
 }
 
 func respondWithError(w http.ResponseWriter, responseCode int, errorMsg string) {
-	type ReturnVals struct {
+	data, err := json.Marshal(struct {
 		Error string `json:"error"`
-	}
-	data, err := json.Marshal(ReturnVals{Error: errorMsg})
+	}{
+		Error: errorMsg,
+	})
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)
 		w.WriteHeader(500)

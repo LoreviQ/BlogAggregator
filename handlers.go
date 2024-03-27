@@ -26,6 +26,7 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// RESPONSE
 	respondWithJSON(w, 200, struct {
 		Status string `json:"status"`
 	}{
