@@ -5,11 +5,12 @@ import (
 )
 
 func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, 200, struct {
+	responseStruct := struct {
 		Status string `json:"status"`
 	}{
 		Status: "ok",
-	})
+	}
+	respondWithJSON(w, 200, responseStruct)
 }
 
 func (cfg *apiConfig) getError(w http.ResponseWriter, r *http.Request) {
@@ -18,18 +19,20 @@ func (cfg *apiConfig) getError(w http.ResponseWriter, r *http.Request) {
 
 func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 	// REQUEST
-	_, err := decodeRequest(w, r, struct {
+	requestStruct := struct {
 		Name string `json:"name"`
-	}{})
+	}{}
+	_, err := decodeRequest(w, r, requestStruct)
 	if err != nil {
 		respondWithError(w, 500, "failed to decode")
 		return
 	}
 
 	// RESPONSE
-	respondWithJSON(w, 200, struct {
+	responseStruct := struct {
 		Status string `json:"status"`
 	}{
 		Status: "ok",
-	})
+	}
+	respondWithJSON(w, 200, responseStruct)
 }
