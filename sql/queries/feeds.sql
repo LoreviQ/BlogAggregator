@@ -6,3 +6,8 @@ RETURNING *;
 -- name: GetFeeds :many
 UPDATE feeds SET last_fetched_at = NOW()
 RETURNING *;
+
+-- name: GetNextFeeds :many
+SELECT * FROM feeds
+ORDER BY last_fetched_at ASC NULLS FIRST
+LIMIT $1;
