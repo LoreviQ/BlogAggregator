@@ -28,7 +28,7 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}{})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to decode")
+		respondWithError(w, http.StatusBadRequest, "failed to decode request body")
 		return
 	}
 
@@ -82,7 +82,7 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 		Url  string `json:"url"`
 	}{})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to decode request body")
+		respondWithError(w, http.StatusBadRequest, "failed to decode request body")
 		return
 	}
 
@@ -154,12 +154,12 @@ func (cfg *apiConfig) postFeedFollow(w http.ResponseWriter, r *http.Request, use
 		FeedID string `json:"feed_id"`
 	}{})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to decode request body")
+		respondWithError(w, http.StatusBadRequest, "Failed to decode request body")
 		return
 	}
 	feedID, err := uuid.Parse(request.FeedID)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid Feed ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Feed ID")
 		return
 	}
 
@@ -190,4 +190,22 @@ func (cfg *apiConfig) postFeedFollow(w http.ResponseWriter, r *http.Request, use
 		CreatedAt: feedFollow.CreatedAt,
 		UpdatedAt: feedFollow.UpdatedAt,
 	})
+}
+
+func (cfg *apiConfig) deleteFeedFollow(w http.ResponseWriter, r *http.Request) {
+	// GET FFID FROM PATH
+	FFid, err := uuid.Parse(r.PathValue("feedFollowID"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+
+	// DELETE FF
+	err = cfg.DB.DeleteFeedFollow(r.Context(), FFid)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
