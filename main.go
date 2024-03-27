@@ -1,29 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/LoreviQ/BlogAggregator/internal/database"
 	"github.com/joho/godotenv"
 
 	_ "github.com/lib/pq"
 )
 
-type ApiConfig struct {
-	port      string
-	dbConnect string
+type apiConfig struct {
+	port string
+	DB   *database.Queries
 }
 
 func main() {
 	godotenv.Load()
-	cfg := ApiConfig{
-		port:      os.Getenv("PORT"),
-		dbConnect: os.Getenv("DB_CONNECT"),
+	db, err := sql.Open("postgres", os.Getenv("DB_CONNECTION_STRING"))
+	if err != nil {
+		log.Panic(err)
 	}
-	fmt.Println(cfg.port)
-	fmt.Println(cfg.dbConnect)
+
+	cfg := apiConfig{
+		port: os.Getenv("PORT"),
+		DB:   database.New(db),
+	}
 
 	server := initialiseServer(cfg, http.NewServeMux())
 
@@ -31,7 +35,7 @@ func main() {
 	log.Panic(server.ListenAndServe())
 }
 
-func initialiseServer(cfg ApiConfig, mux *http.ServeMux) *http.Server {
+func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/readiness", cfg.readinessHandler)
 	mux.HandleFunc("GET /v1/err", cfg.errorHandler)
 
@@ -43,7 +47,7 @@ func initialiseServer(cfg ApiConfig, mux *http.ServeMux) *http.Server {
 	return server
 }
 
-func (cfg *ApiConfig) CorsMiddleware(next http.Handler) http.Handler {
+func (cfg *apiConfig) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
