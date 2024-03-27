@@ -42,6 +42,7 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("POST /v1/users", cfg.postUser)
 	mux.HandleFunc("GET /v1/users", cfg.AuthMiddleware(cfg.getUser))
 	mux.HandleFunc("POST /v1/feeds", cfg.AuthMiddleware(cfg.postFeed))
+	mux.HandleFunc("GET /v1/feeds", cfg.getFeeds)
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{

@@ -10,7 +10,7 @@ import (
 
 func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
 	// RESPONSE
-	respondWithJSON(w, 200, struct {
+	respondWithJSON(w, http.StatusOK, struct {
 		Status string `json:"status"`
 	}{
 		Status: "ok",
@@ -19,7 +19,7 @@ func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
 
 func (cfg *apiConfig) getError(w http.ResponseWriter, r *http.Request) {
 	// RESPONSE
-	respondWithError(w, 500, "Internal Server Error")
+	respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 }
 
 func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}{})
 	if err != nil {
-		respondWithError(w, 500, "failed to decode")
+		respondWithError(w, http.StatusInternalServerError, "failed to decode")
 		return
 	}
 
@@ -82,7 +82,7 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 		Url  string `json:"url"`
 	}{})
 	if err != nil {
-		respondWithError(w, 500, "failed to decode")
+		respondWithError(w, http.StatusInternalServerError, "failed to decode request body")
 		return
 	}
 
@@ -116,4 +116,34 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 		Url:       feed.Url,
 		UserID:    feed.UserID,
 	})
+}
+
+func (cfg *apiConfig) getFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := cfg.DB.GetFeeds(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "failed to retrieve feeds from database")
+		return
+	}
+
+	// RESPONSE
+	type response struct {
+		ID        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+		Name      string    `json:"name"`
+		Url       string    `json:"url"`
+		UserID    uuid.UUID `json:"user_id"`
+	}
+	responseSlice := make([]response, 0, len(feeds))
+	for _, feed := range feeds {
+		responseSlice = append(responseSlice, response{
+			ID:        feed.ID,
+			CreatedAt: feed.CreatedAt,
+			UpdatedAt: feed.UpdatedAt,
+			Name:      feed.Name,
+			Url:       feed.Url,
+			UserID:    feed.UserID,
+		})
+	}
+	respondWithJSON(w, http.StatusOK, responseSlice)
 }
