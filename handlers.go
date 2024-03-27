@@ -33,13 +33,16 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// CREATE USER
-	user := database.CreateUserParams{
+	user, err := cfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		Id:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      request.Name,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create user")
+		return
 	}
-	cfg.DB.CreateUser(r.Context(), user)
 
 	// RESPONSE
 	responseStruct := struct {
@@ -53,5 +56,5 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: user.UpdatedAt,
 		Name:      user.Name,
 	}
-	respondWithJSON(w, 200, responseStruct)
+	respondWithJSON(w, http.StatusOK, responseStruct)
 }
