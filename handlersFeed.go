@@ -33,21 +33,55 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 		return
 	}
 
+	// CREATE FEED FOLLOW
+	feedFollow, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	// RESPONSE
-	respondWithJSON(w, http.StatusOK, struct {
+	type Feed struct {
 		ID        uuid.UUID `json:"id"`
 		CreatedAt time.Time `json:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"`
 		Name      string    `json:"name"`
 		Url       string    `json:"url"`
 		UserID    uuid.UUID `json:"user_id"`
-	}{
-		ID:        feed.ID,
-		CreatedAt: feed.CreatedAt,
-		UpdatedAt: feed.UpdatedAt,
-		Name:      feed.Name,
-		Url:       feed.Url,
-		UserID:    feed.UserID,
+	}
+	type FeedFollow struct {
+		ID        uuid.UUID `json:"id"`
+		FeedID    uuid.UUID `json:"feed_id"`
+		UserID    uuid.UUID `json:"user_id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+	type response struct {
+		Feed       Feed       `json:"feed"`
+		FeedFollow FeedFollow `json:"feed_follow"`
+	}
+	respondWithJSON(w, http.StatusOK, response{
+		Feed: Feed{
+			ID:        feed.ID,
+			CreatedAt: feed.CreatedAt,
+			UpdatedAt: feed.UpdatedAt,
+			Name:      feed.Name,
+			Url:       feed.Url,
+			UserID:    feed.UserID,
+		},
+		FeedFollow: FeedFollow{
+			ID:        feedFollow.ID,
+			FeedID:    feedFollow.FeedID,
+			UserID:    feedFollow.UserID,
+			CreatedAt: feedFollow.CreatedAt,
+			UpdatedAt: feedFollow.UpdatedAt,
+		},
 	})
 }
 
