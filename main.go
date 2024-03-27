@@ -40,6 +40,7 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/readiness", cfg.getReadiness)
 	mux.HandleFunc("GET /v1/err", cfg.getError)
 	mux.HandleFunc("POST /v1/users", cfg.postUser)
+	mux.HandleFunc("GET /v1/users", cfg.getUser)
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{
