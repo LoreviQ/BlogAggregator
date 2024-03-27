@@ -31,3 +31,14 @@ func respondWithError(w http.ResponseWriter, responseCode int, errorMsg string) 
 	w.WriteHeader(responseCode)
 	w.Write(data)
 }
+
+func decodeRequest[T any](w http.ResponseWriter, r *http.Request, _ T) (T, error) {
+	var request T
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("Error decoding parameters: %s", err)
+		w.WriteHeader(500)
+		return request, err
+	}
+	return request, nil
+}

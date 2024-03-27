@@ -19,25 +19,27 @@ type apiConfig struct {
 
 func main() {
 	godotenv.Load()
+	// Connect to DB
 	db, err := sql.Open("postgres", os.Getenv("DB_CONNECTION_STRING"))
 	if err != nil {
 		log.Panic(err)
 	}
-
+	// Setup Config
 	cfg := apiConfig{
 		port: os.Getenv("PORT"),
 		DB:   database.New(db),
 	}
-
+	// Initialise Server
 	server := initialiseServer(cfg, http.NewServeMux())
-
+	// Serve Server
 	log.Printf("Serving on port: %s\n", cfg.port)
 	log.Panic(server.ListenAndServe())
 }
 
 func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
-	mux.HandleFunc("GET /v1/readiness", cfg.readinessHandler)
-	mux.HandleFunc("GET /v1/err", cfg.errorHandler)
+	mux.HandleFunc("GET /v1/readiness", cfg.getReadiness)
+	mux.HandleFunc("GET /v1/err", cfg.getError)
+	mux.HandleFunc("POST /v1/users", cfg.postUser)
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{
