@@ -10,6 +10,7 @@ import (
 )
 
 func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
+	// RESPONSE
 	responseStruct := struct {
 		Status string `json:"status"`
 	}{
@@ -19,6 +20,7 @@ func (cfg *apiConfig) getReadiness(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) getError(w http.ResponseWriter, r *http.Request) {
+	// RESPONSE
 	respondWithError(w, 500, "Internal Server Error")
 }
 

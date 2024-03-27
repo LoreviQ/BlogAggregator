@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// GetAPIKey -
 func GetAPIKey(headers http.Header) (string, error) {
 	authHeader := headers.Get("Authorization")
 	if authHeader == "" {
