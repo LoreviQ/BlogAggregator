@@ -1,9 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 func respondWithJSON[T any](w http.ResponseWriter, responseCode int, body T) {
@@ -43,4 +45,11 @@ func decodeRequest[T any](w http.ResponseWriter, r *http.Request, _ T) (T, error
 		return request, err
 	}
 	return request, nil
+}
+
+func convertNulltime(time sql.NullTime) *time.Time {
+	if time.Valid {
+		return &time.Time
+	}
+	return nil
 }

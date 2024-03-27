@@ -48,12 +48,13 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 
 	// RESPONSE
 	type Feed struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Name      string    `json:"name"`
-		Url       string    `json:"url"`
-		UserID    uuid.UUID `json:"user_id"`
+		ID            uuid.UUID  `json:"id"`
+		CreatedAt     time.Time  `json:"created_at"`
+		UpdatedAt     time.Time  `json:"updated_at"`
+		Name          string     `json:"name"`
+		Url           string     `json:"url"`
+		UserID        uuid.UUID  `json:"user_id"`
+		LastFetchedAt *time.Time `json:"last_fetched_at"`
 	}
 	type FeedFollow struct {
 		ID        uuid.UUID `json:"id"`
@@ -68,12 +69,13 @@ func (cfg *apiConfig) postFeed(w http.ResponseWriter, r *http.Request, user data
 	}
 	respondWithJSON(w, http.StatusOK, response{
 		Feed: Feed{
-			ID:        feed.ID,
-			CreatedAt: feed.CreatedAt,
-			UpdatedAt: feed.UpdatedAt,
-			Name:      feed.Name,
-			Url:       feed.Url,
-			UserID:    feed.UserID,
+			ID:            feed.ID,
+			CreatedAt:     feed.CreatedAt,
+			UpdatedAt:     feed.UpdatedAt,
+			Name:          feed.Name,
+			Url:           feed.Url,
+			UserID:        feed.UserID,
+			LastFetchedAt: convertNulltime(feed.LastFetchedAt),
 		},
 		FeedFollow: FeedFollow{
 			ID:        feedFollow.ID,
@@ -94,22 +96,24 @@ func (cfg *apiConfig) getFeeds(w http.ResponseWriter, r *http.Request) {
 
 	// RESPONSE
 	type response struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Name      string    `json:"name"`
-		Url       string    `json:"url"`
-		UserID    uuid.UUID `json:"user_id"`
+		ID            uuid.UUID  `json:"id"`
+		CreatedAt     time.Time  `json:"created_at"`
+		UpdatedAt     time.Time  `json:"updated_at"`
+		Name          string     `json:"name"`
+		Url           string     `json:"url"`
+		UserID        uuid.UUID  `json:"user_id"`
+		LastFetchedAt *time.Time `json:"last_fetched_at"`
 	}
 	responseSlice := make([]response, 0, len(feeds))
 	for _, feed := range feeds {
 		responseSlice = append(responseSlice, response{
-			ID:        feed.ID,
-			CreatedAt: feed.CreatedAt,
-			UpdatedAt: feed.UpdatedAt,
-			Name:      feed.Name,
-			Url:       feed.Url,
-			UserID:    feed.UserID,
+			ID:            feed.ID,
+			CreatedAt:     feed.CreatedAt,
+			UpdatedAt:     feed.UpdatedAt,
+			Name:          feed.Name,
+			Url:           feed.Url,
+			UserID:        feed.UserID,
+			LastFetchedAt: convertNulltime(feed.LastFetchedAt),
 		})
 	}
 	respondWithJSON(w, http.StatusOK, responseSlice)
