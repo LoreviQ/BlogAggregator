@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/LoreviQ/BlogAggregator/internal/auth"
 	"github.com/LoreviQ/BlogAggregator/internal/database"
 	"github.com/google/uuid"
 )
@@ -62,21 +61,7 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, responseStruct)
 }
 
-func (cfg *apiConfig) getUser(w http.ResponseWriter, r *http.Request) {
-	// AUTH
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// GET USER BY APIKEY
-	user, err := cfg.DB.GetUserByApiKey(r.Context(), apiKey)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid Api Key")
-		return
-	}
-
+func (cfg *apiConfig) getUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	// RESPONSE
 	responseStruct := struct {
 		ID        uuid.UUID `json:"id"`

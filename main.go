@@ -40,7 +40,7 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/readiness", cfg.getReadiness)
 	mux.HandleFunc("GET /v1/err", cfg.getError)
 	mux.HandleFunc("POST /v1/users", cfg.postUser)
-	mux.HandleFunc("GET /v1/users", cfg.getUser)
+	mux.HandleFunc("GET /v1/users", cfg.AuthMiddleware(cfg.getUser))
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{
@@ -48,17 +48,4 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 		Handler: corsMux,
 	}
 	return server
-}
-
-func (cfg *apiConfig) CorsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }
