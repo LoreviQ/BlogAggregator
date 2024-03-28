@@ -8,4 +8,5 @@ SELECT P.id, P.created_at, P.updated_at, P.title, P.url, P.description, P.publis
 FROM posts as P
 LEFT JOIN feed_follows as FF on P.feed_id = FF.feed_id 
 WHERE FF.user_id = $1
+ORDER BY P.published_at DESC
 Limit $2;
