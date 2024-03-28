@@ -50,11 +50,11 @@ func (cfg apiConfig) startScraper() error {
 func (cfg apiConfig) scrapeFeed(wg *sync.WaitGroup, feedDB database.Feed) {
 	defer wg.Done()
 	feedStruct, err := getFeedFromEndpoint(feedDB.Url)
+	cfg.DB.UpdateFetched(context.Background(), feedDB.ID)
 	if err != nil {
 		log.Printf("Failed to obtain feed from %v - Err: %v\n", feedDB.Url, err)
 		return
 	}
-	cfg.DB.UpdateFetched(context.Background(), feedDB.ID)
 	log.Printf("Found the feed: %v\n", feedStruct.Channel.Title)
 }
 
