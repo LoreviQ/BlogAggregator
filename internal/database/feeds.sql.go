@@ -50,8 +50,7 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 }
 
 const getFeeds = `-- name: GetFeeds :many
-UPDATE feeds SET last_fetched_at = NOW()
-RETURNING id, created_at, updated_at, name, url, user_id, last_fetched_at
+SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at FROM feeds
 `
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
@@ -120,4 +119,15 @@ func (q *Queries) GetNextFeeds(ctx context.Context, limit int32) ([]Feed, error)
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateFetched = `-- name: UpdateFetched :exec
+UPDATE feeds
+SET last_fetched_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateFetched(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, updateFetched, id)
+	return err
 }
