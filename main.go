@@ -18,6 +18,7 @@ type apiConfig struct {
 	DB       *database.Queries
 	interval time.Duration
 	noFeeds  int32
+	noPosts  int32
 }
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 		DB:       database.New(db),
 		interval: 20 * time.Second,
 		noFeeds:  2,
+		noPosts:  5,
 	}
 	// Start Scraper
 	go cfg.startScraper()
@@ -53,6 +55,7 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 	mux.HandleFunc("GET /v1/feed_follows", cfg.AuthMiddleware(cfg.getFeedFollows))
 	mux.HandleFunc("POST /v1/feed_follows", cfg.AuthMiddleware(cfg.postFeedFollow))
 	mux.HandleFunc("DELETE /v1/feed_follows/{feedFollowID}", cfg.deleteFeedFollow)
+	mux.HandleFunc("GET /v1/posts", cfg.AuthMiddleware(cfg.getPosts))
 
 	corsMux := cfg.CorsMiddleware(mux)
 	server := &http.Server{

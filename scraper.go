@@ -115,6 +115,8 @@ func parseTime(t string) sql.NullTime {
 		"layout RFC 822 ver2":  "02 Jan 06 15:04 -0700",
 		"layout RFC 1123 ver1": "Mon, 02 Jan 2006 15:04:05 MST",
 		"layout RFC 1123 ver2": "Mon, 02 Jan 2006 15:04:05 -0700",
+		"layout RFC 1123 ver3": "Mon, 2 Jan 2006 15:04:05 MST",
+		"layout RFC 1123 ver4": "Mon, 2 Jan 2006 15:04:05 -0700",
 	}
 	for _, layout := range layouts {
 		parsedTime, err := time.Parse(layout, t)
