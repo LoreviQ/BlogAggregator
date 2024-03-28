@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/LoreviQ/BlogAggregator/internal/database"
 	"github.com/joho/godotenv"
@@ -13,8 +14,10 @@ import (
 )
 
 type apiConfig struct {
-	port string
-	DB   *database.Queries
+	port     string
+	DB       *database.Queries
+	interval time.Duration
+	noFeeds  int32
 }
 
 func main() {
@@ -26,9 +29,13 @@ func main() {
 	}
 	// Setup Config
 	cfg := apiConfig{
-		port: os.Getenv("PORT"),
-		DB:   database.New(db),
+		port:     os.Getenv("PORT"),
+		DB:       database.New(db),
+		interval: 20 * time.Second,
+		noFeeds:  2,
 	}
+	// Start Scraper
+	go cfg.startScraper()
 	// Initialise Server
 	server := initialiseServer(cfg, http.NewServeMux())
 	// Serve Server
