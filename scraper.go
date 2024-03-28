@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/LoreviQ/BlogAggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -55,7 +57,18 @@ func (cfg apiConfig) scrapeFeed(wg *sync.WaitGroup, feedDB database.Feed) {
 		log.Printf("Failed to obtain feed from %v - Err: %v\n", feedDB.Url, err)
 		return
 	}
-	log.Printf("Found the feed: %v\n", feedStruct.Channel.Title)
+	for _, post := range feedStruct.Channel.Item {
+		cfg.DB.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       convertToNullString(post.Title),
+			Url:         post.Link,
+			Description: convertToNullString(post.Description),
+			PublishedAt: parseTime(post.PubDate),
+			FeedID:      feedDB.ID,
+		})
+	}
 }
 
 func getFeedFromEndpoint(endpoint string) (*RSSFeed, error) {
@@ -77,4 +90,43 @@ func getFeedFromEndpoint(endpoint string) (*RSSFeed, error) {
 		return nil, err
 	}
 	return &rssFeed, nil
+}
+
+func convertToNullString(s string) sql.NullString {
+	nullString := sql.NullString{
+		String: s,
+	}
+	if s == "" {
+		nullString.Valid = false
+	} else {
+		nullString.Valid = true
+	}
+	return nullString
+}
+
+func parseTime(t string) sql.NullTime {
+	if t == "" {
+		return sql.NullTime{
+			Valid: false,
+		}
+	}
+	layouts := map[string]string{
+		"layout RFC 822 ver1":  "02 Jan 06 15:04 MST",
+		"layout RFC 822 ver2":  "02 Jan 06 15:04 -0700",
+		"layout RFC 1123 ver1": "Mon, 02 Jan 2006 15:04:05 MST",
+		"layout RFC 1123 ver2": "Mon, 02 Jan 2006 15:04:05 -0700",
+	}
+	for _, layout := range layouts {
+		parsedTime, err := time.Parse(layout, t)
+		if err == nil {
+			return sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
+		}
+	}
+	log.Printf("Failed to parse time\ntime: %v\n", t)
+	return sql.NullTime{
+		Valid: false,
+	}
 }
