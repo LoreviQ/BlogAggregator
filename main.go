@@ -46,6 +46,7 @@ func main() {
 }
 
 func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
+	mux.HandleFunc("/", cfg.landingPage)
 	mux.HandleFunc("GET /v1/readiness", cfg.getReadiness)
 	mux.HandleFunc("GET /v1/err", cfg.getError)
 	mux.HandleFunc("POST /v1/users", cfg.postUser)
@@ -63,4 +64,18 @@ func initialiseServer(cfg apiConfig, mux *http.ServeMux) *http.Server {
 		Handler: corsMux,
 	}
 	return server
+}
+
+func (cfg apiConfig) landingPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	w.WriteHeader(200)
+	const page = `<html>
+<head></head>
+<body>
+	<p> Hello from Docker! I'm a Go server. </p>
+</body>
+</html>
+`
+	w.Write([]byte(page))
 }
